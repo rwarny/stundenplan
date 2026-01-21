@@ -49,7 +49,7 @@ class EditDialog:
         time_combo.pack(pady=5)
         time_combo.current(0)
 
-        # === SCHNELLAUSWAHL (NEU!) ===
+        # === SCHNELLAUSWAHL ===
         quick_frame = tk.Frame(self.dialog, bg=COLORS["bg"])
         quick_frame.pack(pady=10)
         
@@ -77,6 +77,18 @@ class EditDialog:
             selectcolor=COLORS["bg"]
         )
         free_cb.pack(side="left", padx=10)
+
+        # Benachrichtigung Checkbox
+        self.notify = tk.BooleanVar(value=False)
+        notify_cb = tk.Checkbutton(
+            quick_frame,
+            text="🔔 Erinnern",
+            variable=self.notify,
+            fg=COLORS["fg"],
+            bg=COLORS["bg"],
+            selectcolor=COLORS["bg"]
+        )
+        notify_cb.pack(side="left", padx=10)
 
         # Fach Eingabe (mit Vorschlägen)
         tk.Label(self.dialog, text="Fach:", fg=COLORS["fg"], bg=COLORS["bg"]).pack(pady=(10,0))
@@ -172,7 +184,8 @@ class EditDialog:
                 "start": start,
                 "end": end,
                 "subject": subject,
-                "lesson_type": lesson_type
+                "lesson_type": lesson_type,
+                "notify": self.notify.get()
             }
             self.timetable.edit_lesson(day, self.lesson_index, new_data)
 
@@ -222,3 +235,7 @@ class EditDialog:
             self.is_praxis.set(True)
         elif lesson["lesson_type"] == "Frei":
             self.is_free.set(True)
+
+        # Benachrichtigung setzen
+        if lesson.get("notify", False):
+            self.notify.set(True)
