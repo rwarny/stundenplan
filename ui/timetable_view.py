@@ -151,28 +151,70 @@ class TimetableView:
                 else:
                     self._create_empty_cell(row + 1, col + 1, day, time_slot)
 
-    def highlight_current(self):
-        """ Hebt die aktuell laufende Stunde visuell hervor"""
-        # Aktuelle Lesson holen
-        current =self.timetable.get_current_lesson()
-        if current is None:
-            return
+    def _darken_color(self, hex_color, factor=0.5):
+        """Dunkelt eine Hex-Farbe ab."""
+        # Hex zu RGB
+        hex_color = hex_color.lstrip("#")
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
         
-        # Wochentag bestimmen
-        weekday_index = datetime.now().weekday()
-        if weekday_index > 4:
-            return
-        col = weekday_index + 1
+        # Abdunkeln
+        r = int(r * factor)
+        g = int(g * factor)
+        b = int(b * factor)
+        
+        # Zurück zu Hex
+        return f"#{r:02x}{g:02x}{b:02x}"
 
-        # Zeile finden
-        for row, (start, _) in enumerate(TIME_SLOTS):
-            if start == current["start"]:
-                # Zeile aus self.cells holen und markeiren
-                cell = self.cells.get((row + 1, col))
-                if cell:
-                    cell.config(relief="solid", borderwidth=3)
-                break
-
+    def highlight_current(self):
+        """Hebt die aktuell laufende Stunde hervor und dunkelt vergangene ab."""
+        now = datetime.now()
+        current_time = now.strftime("%H:%M")
+        today_weekday = now.weekday()
+        
+        # Alle Zellen durchgehen
+        for (row, col), cell in self.cells.items():
+            # Zeile 0 ist Header, überspringen
+            if row == 0:
+                continue
+            
+            # Zeitslot für diese Zeile holen (row-1 wegen Header)
+            time_index = row - 1
+            if time_index >= len(TIME_SLOTS):
+                continue
+            
+            start, end = TIME_SLOTS[time_index]
+            weekday = col - 1  # Spalte 1 = Montag (0)
+            
+            # Rahmen zurücksetzen
+            cell.config(relief="flat", borderwidth=0)
+            
+            # Ist diese Zelle in der Vergangenheit?
+            is_past = False
+            
+            if weekday < today_weekday:
+                is_past = True
+            elif weekday == today_weekday and end <= current_time:
+                is_past = True
+            
+            # Original-Farbe holen (beim ersten Mal speichern)
+            if not hasattr(cell, "original_bg"):
+                cell.original_bg = cell.cget("bg")
+                cell.original_fg = cell.cget("fg")
+            
+            # Vergangene Stunden abdunkeln
+            if is_past:
+                dark_bg = self._darken_color(cell.original_bg, 0.4)
+                cell.config(bg=dark_bg, fg="#888888")
+            else:
+                # Normale Farben wiederherstellen
+                cell.config(bg=cell.original_bg, fg=cell.original_fg)
+            
+            # Aktuelle Stunde markieren
+            if weekday == today_weekday and start <= current_time < end:
+                cell.config(relief="solid", borderwidth=3)
+                
     def refresh(self):
         """ Baut die Tabelle neu auf (z.B. nach dem Bearbeiten einer Lesson) """
         # Alle Zeilen zerstören
