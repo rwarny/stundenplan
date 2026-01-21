@@ -8,11 +8,17 @@ class Timetable:
         for day in WEEKDAYS:
             self.schedule[day] = []
 
-    def add_lesson(self, day, start, end, subject, lesson_type):
-        """ Fügt eine neue Stunde, an entsprechenden Tag, zur Passenden Stunde zum Stundeplan hinzu """
-        lesson = {"start": start, "end": end, "subject": subject, "lesson_type": lesson_type}
+    def add_lesson(self, day, start, end, subject, lesson_type, notify=False):
+        """Fügt eine neue Lesson hinzu."""
+        lesson = {
+            "start": start,
+            "end": end,
+            "subject": subject,
+            "lesson_type": lesson_type,
+            "notify": notify
+        }
         self.schedule[day].append(lesson)
-    
+        
     def edit_lesson(self, day, index, new_data):
         """ Bearbeitet eine existierende Stunde anhand des Indexes """
         self.schedule[day][index].update(new_data)
