@@ -1,6 +1,6 @@
 # 📅 Stundenplan
 
-Ein intelligenter Wochenplaner für den Ausbildungs-Unterricht mit Live-Uhr, Farbcodierung und Smart-Benachrichtigungen.
+Ein intelligenter Wochenplaner für den Ausbildungs-Unterricht mit Live-Uhr, Farbcodierung und individuellen Benachrichtigungen.
 
 ![Hauptansicht](screenshots/screenshot_main.png)
 
@@ -8,10 +8,13 @@ Ein intelligenter Wochenplaner für den Ausbildungs-Unterricht mit Live-Uhr, Far
 
 - **Wochenansicht** - Übersichtliche Darstellung von Montag bis Freitag
 - **Live-Uhr** - Aktuelle Uhrzeit und deutsches Datum
-- **Heutiger Tag hervorgehoben** - Die aktuelle Tages-Spalte ist farblich markiert
-- **Aktuelle Stunde markiert** - Die laufende Unterrichtsstunde hat einen Rahmen
+- **Heutiger Tag hervorgehoben** - Die aktuelle Tages-Spalte ist türkis markiert
+- **Aktuelle Stunde markiert** - Die laufende Unterrichtsstunde hat einen schwarzen Rahmen
+- **Vergangene Stunden abgedunkelt** - Bereits vergangene Stunden werden dunkler dargestellt
 - **Farbcodierung** - Verschiedene Farben für verschiedene Fachtypen
-- **Smart-Benachrichtigungen** - Piepton 5 Minuten vor Unterrichtsbeginn (nur nach Mittagspause oder Praxiseinheit)
+- **Individuelle Benachrichtigungen** - Piepton 5 Minuten vor Unterrichtsbeginn (per Checkbox aktivierbar)
+- **Schnellauswahl** - Checkboxen für "Praxis" und "Frei"
+- **Häufige Fächer** - Dropdown mit gespeicherten Fächern
 - **Feste Slots** - Mittagspause (12:40-13:25) und Praxis (15:00-16:00) automatisch eingetragen
 - **Dark Mode** - Augenschonendes dunkles Design
 - **Persistenz** - Stundenplan wird automatisch als JSON gespeichert
@@ -28,7 +31,7 @@ Ein intelligenter Wochenplaner für den Ausbildungs-Unterricht mit Live-Uhr, Far
 
 1. Repository klonen:
 ```bash
-git clone https://github.com/DEIN-USERNAME/stundenplan.git
+git clone https://github.com/rwarny/stundenplan.git
 cd stundenplan
 ```
 
@@ -84,12 +87,11 @@ stundenplan/
 | Mittagspause | ⚫ Grau |
 | Frei | ⬛ Dunkelgrau |
 
-## 🔔 Smart-Benachrichtigungen
+## 🔔 Benachrichtigungen
 
-Das Benachrichtigungs-System ist intelligent:
-- Piepton ertönt **nur** wenn nach einer Mittagspause oder Praxiseinheit Unterricht beginnt
-- Keine störenden Benachrichtigungen zwischen normalen Unterrichtsstunden
-- 5 Minuten vor Beginn wird ein Popup mit Fachname und Uhrzeit angezeigt
+- Im Bearbeiten-Dialog kann für jede Stunde die Checkbox **"🔔 Erinnern"** aktiviert werden
+- 5 Minuten vor Beginn erscheint ein Popup mit Piepton
+- Ideal für Stunden nach der Mittagspause oder nach Praxiseinheiten
 
 ## 🛠️ Bedienung
 
@@ -97,6 +99,7 @@ Das Benachrichtigungs-System ist intelligent:
 - **Stunde bearbeiten:** Klick auf eine gefüllte Zelle
 - **Stunde löschen:** Im Bearbeiten-Dialog auf "Löschen" klicken
 - **Schnellauswahl:** Checkbox "Praxis" oder "Frei" für schnelles Eintragen
+- **Benachrichtigung:** Checkbox "🔔 Erinnern" für 5-Minuten-Erinnerung
 
 ## 📝 Lizenz
 
