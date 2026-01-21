@@ -10,46 +10,32 @@ class NotificationManager:
         self.last_date = date.today()
 
     def check_notifications(self):
-        """ Prüft ob eine Benachrichtigung ausgelöst werden soll """
-        # Nächste Stunde holen:
+        """Prüft ob eine Benachrichtigung fällig ist."""
         next_lesson = self.timetable.get_next_lesson()
+        
         if next_lesson is None:
             return
         
-        # Aktuelle Zeit in Minuten
+        # Hat diese Lesson Benachrichtigung aktiviert?
+        if not next_lesson.get("notify", False):
+            return
+        
+        # Zeit berechnen
         now = datetime.now()
         current_minutes = now.hour * 60 + now.minute
-
-        # Startzeit der nächsten Lesson in Minuten
-        start_time = next_lesson["start"]
-        hours, minutes = start_time.split(":")
-        start_minutes = int(hours) * 60 + int(minutes)
-
-        # Differenz berechnen
-        minutes_until_start = start_minutes - current_minutes
-
-        # Is es 5 Minuten oder weniger bis zum Start
-        if minutes_until_start > NOTIFICATION_MINUTES_BEFORE:
-            return # Zu Früh
         
-        # Wurde diese Lesson schon benachrichtigt?
-        if next_lesson["start"] in self.notified_lessons:
-            return # Schon benachrichtigt
+        start_parts = next_lesson["start"].split(":")
+        start_minutes = int(start_parts[0]) * 60 + int(start_parts[1])
         
-        # Vorherige Lesson prüfen (Benachrichtigungen nur wenn vohrer Praxis oder Mittagspause)
-        # Hole vorherige Lesson
-        previous_lesson = self.timetable.get_previous_lesson()
-
-        # Keine vorherige? Dann keine Benachrichtigung
-        if previous_lesson is None:
-            return
-        # War vorherige lesson Mittagspause oder Praxis?
-        if previous_lesson["lesson_type"] not in NOTIFICATION_TRIGGERS:
-            return # Keine Benachrichtigung
+        minutes_until = start_minutes - current_minutes
         
-        # Benachrichtigung auslosen
-        self.notified_lessons.add(next_lesson["start"])
-        self.callback(next_lesson)
+        # Benachrichtigung 5 Minuten vorher
+        if minutes_until <= NOTIFICATION_MINUTES_BEFORE and minutes_until > 0:
+            # Schon benachrichtigt?
+            lesson_key = f"{next_lesson['start']}_{next_lesson['subject']}"
+            if lesson_key not in self.notified_lessons:
+                self.notified_lessons.add(lesson_key)
+                self.callback(next_lesson)
 
     def reset_daily(self):
         """ Setzt die benachrichtigten Lessonst zurück wenn ein neuer Tag beginnt """
