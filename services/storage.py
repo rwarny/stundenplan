@@ -21,4 +21,22 @@ def load_timetable(filename):
     else:
         return Timetable()
 
+def load_subjects(filename):
+    """Lädt die Fächer aus JSON."""
+    if os.path.exists(filename):
+        with open(filename, "r", encoding="utf-8") as file:
+            return json.load(file)
+    else:
+        # Standard-Fächer wenn Datei nicht existiert
+        default = {
+            "NET-IS": "Netzwerke & IT-Sicherheit",
+            "PE": "Praxiseinheit"
+        }
+        # Sofort speichern damit die Datei existiert
+        save_subjects(default, filename)
+        return default
 
+def save_subjects(subjects, filename):
+    """Speichert die Fächer als JSON."""
+    with open(filename, "w", encoding="utf-8") as file:
+        json.dump(subjects, file, indent=4, ensure_ascii=False)
