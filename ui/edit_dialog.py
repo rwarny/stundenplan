@@ -1,6 +1,8 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
-from config.constants import COLORS, FONT_FAMILY, FONT_SIZES, SUBJECT_COLORS
+import customtkinter as ctk
+from tkinter import messagebox
+from config.constants import SUBJECTS_FILENAME, SUBJECT_COLORS
+from services.storage import load_subjects
 from config.time_config import WEEKDAYS, TIME_SLOTS
 
 class EditDialog:
@@ -15,10 +17,9 @@ class EditDialog:
         self.is_new = lesson_index is None
 
         # Dialog Fenster erstellen
-        self.dialog = tk.Toplevel(parent)
+        self.dialog = ctk.CTkToplevel(parent)
         self.dialog.title("Neue Stunde" if self.is_new else "Stunde bearbeiten")
-        self.dialog.geometry("400x350")
-        self.dialog.configure(bg=COLORS["bg"])
+        self.dialog.geometry("400x450")
 
         # Modal machen (blockiert Hauptfenster)
         self.dialog.grab_set()
@@ -31,83 +32,74 @@ class EditDialog:
         """Erstellt die Eingabefelder."""
         
         # Häufige Fächer (kannst du später erweitern)
-        self.frequent_subjects = ["NET-IS", "WiSo", "UML-OOP", "Konsultation Sebastian", "ReWe"]
+        self.frequent_subjects = list(load_subjects(SUBJECTS_FILENAME).keys())
         
         # Tag Auswahl (nur bei neuer Lesson)
         if self.is_new:
-            tk.Label(self.dialog, text="Tag:", fg=COLORS["fg"], bg=COLORS["bg"]).pack(pady=(10,0))
+            ctk.CTkLabel(self.dialog, text="Tag:").pack(pady=(10,0))
             self.day_var = tk.StringVar()
-            day_combo = ttk.Combobox(self.dialog, textvariable=self.day_var, values=WEEKDAYS, state="readonly")
+            day_combo = ctk.CTkComboBox(self.dialog, variable=self.day_var, values=WEEKDAYS, state="readonly")
             day_combo.pack(pady=5)
-            day_combo.current(0)
+            day_combo.set(WEEKDAYS[0])
 
         # Zeitslot-Auswahl
-        tk.Label(self.dialog, text="Zeitslot:", fg=COLORS["fg"], bg=COLORS["bg"]).pack(pady=(10,0))
+        ctk.CTkLabel(self.dialog, text="Zeitslot:").pack(pady=(10,0))
         self.time_var = tk.StringVar()
         time_options = [f"{start} - {end}" for start, end in TIME_SLOTS]
-        time_combo = ttk.Combobox(self.dialog, textvariable=self.time_var, values=time_options, state="readonly")
+        time_combo = ctk.CTkComboBox(self.dialog, variable=self.time_var, values=time_options, state="readonly")
         time_combo.pack(pady=5)
-        time_combo.current(0)
+        time_combo.set(time_options[0])
 
         # === SCHNELLAUSWAHL ===
-        quick_frame = tk.Frame(self.dialog, bg=COLORS["bg"])
+        quick_frame = ctk.CTkFrame(self.dialog)
         quick_frame.pack(pady=10)
         
         self.is_praxis = tk.BooleanVar(value=False)
         self.is_free = tk.BooleanVar(value=False)
         
-        praxis_cb = tk.Checkbutton(
+        praxis_cb = ctk.CTkCheckBox(
             quick_frame,
             text="Praxis",
             variable=self.is_praxis,
             command=self._on_quick_select,
-            fg=COLORS["fg"],
-            bg=COLORS["bg"],
-            selectcolor=COLORS["bg"]
         )
         praxis_cb.pack(side="left", padx=10)
         
-        free_cb = tk.Checkbutton(
+        free_cb = ctk.CTkCheckBox(
             quick_frame,
             text="Frei",
             variable=self.is_free,
             command=self._on_quick_select,
-            fg=COLORS["fg"],
-            bg=COLORS["bg"],
-            selectcolor=COLORS["bg"]
         )
         free_cb.pack(side="left", padx=10)
 
         # Benachrichtigung Checkbox
         self.notify = tk.BooleanVar(value=False)
-        notify_cb = tk.Checkbutton(
+        notify_cb = ctk.CTkCheckBox(
             quick_frame,
             text="🔔 Erinnern",
             variable=self.notify,
-            fg=COLORS["fg"],
-            bg=COLORS["bg"],
-            selectcolor=COLORS["bg"]
         )
         notify_cb.pack(side="left", padx=10)
 
         # Fach Eingabe (mit Vorschlägen)
-        tk.Label(self.dialog, text="Fach:", fg=COLORS["fg"], bg=COLORS["bg"]).pack(pady=(10,0))
+        ctk.CTkLabel(self.dialog, text="Fach:").pack(pady=(10,0))
         self.subject_var = tk.StringVar()
-        self.subject_combo = ttk.Combobox(
+        self.subject_combo = ctk.CTkComboBox(
             self.dialog, 
-            textvariable=self.subject_var, 
+            variable=self.subject_var, 
             values=self.frequent_subjects,
-            width=27
+            width=200
         )
         self.subject_combo.pack(pady=5)
 
         # Typ Auswahl
-        tk.Label(self.dialog, text="Typ:", fg=COLORS["fg"], bg=COLORS["bg"]).pack(pady=(10,0))
+        ctk.CTkLabel(self.dialog, text="Typ:").pack(pady=(10,0))
         self.type_var = tk.StringVar()
         type_options = list(SUBJECT_COLORS.keys())
-        self.type_combo = ttk.Combobox(self.dialog, textvariable=self.type_var, values=type_options, state="readonly")
+        self.type_combo = ctk.CTkComboBox(self.dialog, variable=self.type_var, values=type_options)
         self.type_combo.pack(pady=5)
-        self.type_combo.current(0)
+        self.type_combo.set(type_options[0])
         
         # Wenn Bearbeiten: Werte vorausfüllen
         if not self.is_new:
@@ -117,45 +109,50 @@ class EditDialog:
         """ Erstellt die Buttons """
 
         # Button Frame
-        btn_frame=tk.Frame(self.dialog, bg=COLORS["bg"])
+        btn_frame=ctk.CTkFrame(self.dialog)
         btn_frame.pack(pady=20)
 
         # Speichern-Button
-        save_btn = tk.Button(
+        save_btn = ctk.CTkButton(
             btn_frame,
             text="Speichern",
             command=self._save,
-            bg="#4CAF50",
-            fg="white",
+            fg_color="#4CAF50",
+            text_color="white",
             width=10
         )
         save_btn.pack(side="left", padx=5)
 
         # Löschen-Button (nur beim Bearbeiten)
         if not self.is_new:
-            delete_btn = tk.Button(
+            delete_btn = ctk.CTkButton(
                 btn_frame,
                 text="Löschen",
                 command=self._delete,
-                bg="#FF6B6B",
-                fg="white",
+                fg_color="#FF6B6B",
+                text_color="white",
                 width=10
             )
             delete_btn.pack(side="left", padx=5)
 
         # Abbrechen-Button
-        cancel_btn = tk.Button(
+        cancel_btn = ctk.CTkButton(
             btn_frame,
             text="Abbrechen",
             command=self.dialog.destroy,
-            bg="#95A5A6",
-            fg="white",
+            fg_color="#95A5A6",
+            text_color="white",
             width=10
         )
         cancel_btn.pack(side="left", padx=5)
 
     def _save(self):
         """ Speichert die Lesson """
+
+        # Bei "Frei" automatisch Fach setzen
+        if self.is_free.get():
+            self.subject_var.set("Frei")
+
         # Validierung
         if not self.subject_var.get().strip():
             messagebox.showerror("FEHLER", "Bitte Fach angeben!")
